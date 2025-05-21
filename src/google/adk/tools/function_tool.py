@@ -41,7 +41,7 @@ class FunctionTool(BaseTool):
     else:
       # Handle objects with __call__ method
       call_method = func.__call__
-      name = func.__class__.__name__
+      name = func.__name__
       doc = call_method.__doc__ or func.__doc__ or ''
     super().__init__(name=name, description=doc)
     self.func = func
