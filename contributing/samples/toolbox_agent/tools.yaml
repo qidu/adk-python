@@ -16,6 +16,31 @@ sources:
         kind: "sqlite"
         database: "tool_box.db"
 tools:
+  search-hotels:
+    kind: sqlite-sql
+    source: my-sqlite-db
+    description: Search for hotels base on booking state.
+    parameters:
+      - name: state
+        type: integer
+        description: The booking state for the hotel. 1 for booked, 0 for available.
+    statement: >-
+      SELECT * FROM hotels WHERE booked = $1;
+  search-hotels-by-date:
+    kind: sqlite-sql
+    source: my-sqlite-db
+    description: Search for available hotels with checkin_date and checkout_date fullfilling the
+      customer's request checkin_date and request days.
+    parameters:
+      - name: checkin_date
+        type: string
+        description: The check-in date customer wanted.
+      - name: days
+        type: integer
+        description: The number of days the customer wants to stay.
+    statement: >-
+      SELECT * FROM hotels WHERE checkin_date <= strftime('%Y-%m-%d', replace($1, ',', '')) AND
+      checkout_date >= strftime('%Y-%m-%d', replace($1, ',', ''), '+' || $2 || ' days') AND booked = 0;
   search-hotels-by-name:
     kind: sqlite-sql
     source: my-sqlite-db
@@ -73,9 +98,12 @@ tools:
         description: The ID of the hotel to cancel.
     statement: UPDATE hotels SET booked = 0 WHERE id = $1;
 toolsets:
-  my-toolset:
+  customer-toolset:
+    - search-hotels
+    - search-hotels-by-date
     - search-hotels-by-name
     - search-hotels-by-location
+  service-toolset:
     - book-hotel
     - update-hotel
     - cancel-hotel
