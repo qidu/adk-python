@@ -97,13 +97,107 @@ tools:
         type: string
         description: The ID of the hotel to cancel.
     statement: UPDATE hotels SET booked = 0 WHERE id = $1;
+  check-orders:
+    kind: sqlite-sql
+    source: my-sqlite-db
+    description: Check orders by customer ID.
+    parameters:
+      - name: customer
+        type: string
+        description: The name of the customer whose orders to check.
+    statement: SELECT * FROM customer, orders, hotels WHERE customer.name = $1 AND orders.customer = customer.id AND orders.hotel = hotels.id;
+  book-hotel-order:
+    kind: sqlite-sql
+    source: my-sqlite-db
+    description: Confirm a hotel booking order by hotel ID and customer ID.
+    parameters:
+      - name: customer_id
+        type: integer
+        description: The customer ID for who booked the hotel.
+      - name: hotel_id
+        type: integer
+        description: The hotel ID to confirm.
+      - name: checkin_date
+        type: string
+        description: The check-in date of the hotel.
+      - name: days
+        type: integer
+        description: The number of days the customer wants to stay.
+      - name: habits
+        type: string
+        description: The habits of the customer, such as 'no smoking room with window'.
+    statement: >-
+      BEGIN TRANSACTION; UPDATE hotels SET booked = 1 WHERE id=$1; INSERT INTO orders (customer, hotel, checkin_date, days, confirmed, habits, order_time) VALUES ($1, $2, strftime('%Y-%m-%d', replace($3, ',', '')), $4, 0, $5, datetime('now'));COMMIT;
+  confirm-order:
+    kind: sqlite-sql
+    source: my-sqlite-db
+    description: Confirm a hotel booking order by its ID.
+    parameters:
+      - name: customer_id
+        type: integer
+        description: The ID of the customer.
+      - name: hotel_id
+        type: integer
+        description: The ID of the hotel.
+    statement: UPDATE orders SET confirmed = 1 WHERE customer = $1 AND hotel = $2; SELECT * FROM orders WHERE customer = $1 AND hotel = $2;
+  cancel-order:
+    kind: sqlite-sql
+    source: my-sqlite-db
+    description: Cancel a hotel booking order by its ID.
+    parameters:
+      - name: customer_id
+        type: integer
+        description: The ID of the customer.
+      - name: hotel_id
+        type: integer
+        description: The ID of the hotel.
+    statement: >-
+      BEGIN TRANSACTION; UPDATE orders SET customer = 0, hotel = 0, confirmed = 0 WHERE customer = $1 AND hotel = $2; UPDATE hotels SET booked = 0 WHERE id = $2; COMMIT;
+  customer-register:
+    kind: sqlite-sql
+    source: my-sqlite-db
+    description: Register a new customer.
+    parameters:
+      - name: gender
+        type: string
+        description: The gender of the customer to register.
+      - name: year
+        type: integer
+        description: The year of the customer to register.
+      - name: habbits
+        type: string
+        description: The habbits of the customer to register. '' for no habbits.
+      - name: name
+        type: string
+        description: The name of the customer to register.
+      - name: country
+        type: string
+        description: The country of the customer to register. '' for no country.
+    statement: >-
+      INSERT INTO customer (gender, year, habits, name, country) VALUES ($1, $2, $3, $4, $5);
+  customer-query:
+    kind: sqlite-sql
+    source: my-sqlite-db
+    description: Query a customer ID and other info by the name.
+    parameters:
+      - name: name
+        type: string
+        description: The name of the customer to query.
+    statement: SELECT * FROM customer WHERE name = $1;
 toolsets:
-  customer-toolset:
+  hotel-query-toolsets:
     - search-hotels
     - search-hotels-by-date
     - search-hotels-by-name
     - search-hotels-by-location
-  service-toolset:
-    - book-hotel
+  booking-toolsets:
     - update-hotel
     - cancel-hotel
+    - book-hotel-order
+  customer-registry:
+    - customer-register
+    - customer-query
+  order-service:
+    - check-orders
+    - confirm-order
+    - cancel-order

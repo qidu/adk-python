@@ -25,6 +25,8 @@ chmod +x toolbox
 ```bash
 sqlite3 tool_box.db
 ```
+Or view and modify the db with a web tools:
+> install `pip install sqlite_web`, and then `sqlite_web tool_box.db`
 
 * Run below SQL:
 
@@ -53,6 +55,7 @@ VALUES
   (9, 'Courtyard Zurich', 'Zurich', 'Upscale', '2024-04-03', '2024-04-13', 0),
   (10, 'Comfort Inn Bern', 'Bern', 'Midscale', '2024-04-04', '2024-04-16', 0);
 ```
+
 
 # create tools configurations
 

@@ -32,10 +32,16 @@ root_agent = Agent(
     # Add Toolbox tools to ADK agent
     tools=[
         ToolboxToolset(
-            server_url="http://127.0.0.1:5000", toolset_name="customer-toolset"
+            server_url="http://127.0.0.1:5000", toolset_name="hotel-query-toolsets"
         ),
         ToolboxToolset(
-            server_url="http://127.0.0.1:5000", toolset_name="service-toolset"
+            server_url="http://127.0.0.1:5000", toolset_name="booking-toolsets"
+        ),
+        ToolboxToolset(
+            server_url="http://127.0.0.1:5000", toolset_name="customer-registry"
+        ),
+        ToolboxToolset(
+            server_url="http://127.0.0.1:5000", toolset_name="order-service"
         ),
         MCPToolset(
             connection_params=StdioServerParameters(
